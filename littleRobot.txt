@@ -160,6 +160,50 @@ interrupts button gpio_pulldown_en drop
 ' choc button pinchange forth                                   
 : chocx3 av 3 0 do choc 2000 ms  loop  s ; 
 
+( Ultrason littleRobot many thanks to Atle Bergstrom )
+:  ... 200 ms ;
+                                                  
+decimal forth ledc 
+ ...                                           
+18 constant PIN_ECHO  
+...
+19 constant PIN_TRIG 
+...                   
+PIN_TRIG output pinmode 
+...                                        
+PIN_ECHO input pinmode 
+...
+: trig
+    LOW PIN_TRIG pin 2 ms 
+	HIGH PIN_TRIG pin 10 ms 
+	LOW PIN_TRIG pin
+;
+...
+: echo
+    PIN_ECHO pulsein  
+;
+...
+: turnD90 st1 av2 500 ms S ;
+...
+: ARH   AR 1000 ms turnD90 S ;
+ 
+...
+: scan
+    trig echo 250 < IF
+      ARH  
+    ELSE
+        
+    THEN
+    
+;
+
+...
+
+: top av  BEGIN scan key? UNTIL ;
+
+...
+
+: top: av  40 for scan next  ;
 
 
 
