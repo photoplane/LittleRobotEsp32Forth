@@ -153,12 +153,6 @@ capt2 #GPIO_INTR_POSEDGE gpio_set_intr_type drop
 
 forth
 
-\ interrupteur comme capteur de choc                                               
-17 constant button                                              
-: choc button digitalRead 0= IF AR  else AV then ;              
-interrupts button gpio_pulldown_en drop                         
-' choc button pinchange forth                                   
-: chocx3 av 3 0 do choc 2000 ms  loop  s ; 
 
 ( Ultrason littleRobot many thanks to Atle Bergstrom )
 :  ... 200 ms ;
