@@ -13,7 +13,7 @@
 DEFINED? --littleRobot [if] forget --littleRobot  [then]
 create --littleRobot
 
-\ Block 1 - Mouvements Robot
+\ movements Robot many thanks to PETER FORTH
 
 FORTH DEFINITIONS also 
 
@@ -22,8 +22,8 @@ DECIMAL
 
 15 constant PWMR1 
  5 constant PWMR2 
- 2 constant PWMR3 
- 4 constant PWMR4 
+ \ 2 constant PWMR3 
+ \ 4 constant PWMR4 
 
 1 constant chRIGHT1 
 2 constant chRIGHT2 
@@ -51,52 +51,54 @@ init-pwm
     del ms 
   ; 
 
-: AV1 ( -- )
+: AV1 ( -- ) \ AV1 forward 1 RIGHT side
     15 servo1 
   ; 
-: AV2 ( -- )
+: AV2 ( -- )\ AV2 forward 2 LEFT side
     50 servo2 
   ; 
-: AV ( -- )
+: AV ( -- ) \ AV forward all
     AV1 AV2 
   ; 
 
-: AR1 
+: AR1 ( -- ) \ AR1 backward 1 RIGHT side
     48 servo1 
   ; 
-: AR2 
+: AR2 ( -- ) \ AR backward2 LEFT side
     15 servo2 
   ; 
-: AR 
+: AR ( -- ) \ AR backward all
     AR1 AR2 
   ; 
 
-: st1 
+: st1 ( -- ) \ STOP 1 RIGHT side
     0 servo1 
   ; 
-: st2 
+: st2 ( -- ) \ STOP 2 LEFT side
     0 servo2 
   ; 
-: S 
+: S ( -- ) \ STOP all
     st1 st2 
   ; 
 
-: alrt 
+\ example
+
+: alrt ( -- ) \ alrt go and return
     av 1000 ms 
     s ar 1000 ms S 
   ; 
 
-\ chronometres avec 2 capteurs HALL 
+\ chronometers with 2 HALL sensors 
 
 2 constant capt1 
 variable c 
 variable t1 
-variable t2 
+\ variable t2 
 
 4 constant capt2 
 variable d 
 variable d1 
-variable d2 
+\ variable d2 
 
 0 constant GPIO_PULLUP_ONLY 
 capt1 input pinMode 
@@ -135,7 +137,8 @@ capt2 input pinMode
     then 
   ; 
 
-\ Block 5 - suite chronometres hall
+
+\ interrupts code
 
 interrupts 
 
@@ -154,7 +157,8 @@ capt2 #GPIO_INTR_POSEDGE gpio_set_intr_type drop
 forth
 
 
-( Ultrason littleRobot many thanks to Atle Bergstrom )
+ \ Ultrason littleRobot many thanks to Atle Bergstrom 
+
 :  ... 200 ms ;
                                                   
 decimal forth ledc 
@@ -177,9 +181,9 @@ PIN_ECHO input pinmode
     PIN_ECHO pulsein  
 ;
 ...
-: turnD90 st1 av2 500 ms S ;
+: turnD90 st1 av2 500 ms S ; \ turn 90 degrees right
 ...
-: ARH   AR 1000 ms turnD90 S ;
+: ARH   AR 1000 ms turnD90 S ; \ forward turn backward
  
 ...
 : scan
@@ -191,13 +195,15 @@ PIN_ECHO input pinmode
     
 ;
 
+\ examples 
+
 ...
 
 : top av  BEGIN scan key? UNTIL ;
 
 ...
 
-: top: av  40 for scan next  ;
+: top: av  50 for scan next  ;
 
 
 
