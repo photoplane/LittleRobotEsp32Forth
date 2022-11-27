@@ -23,16 +23,19 @@ DECIMAL
 15 constant PWMR1 
  5 constant PWMR2 
  \ 2 constant PWMR3 
- \ 4 constant PWMR4 
+16 constant PWMR4 \ sur Rx2 
 
 1 constant chRIGHT1 
-2 constant chRIGHT2 
+2 constant chRIGHT2
+3 constant chRIGHT3
 
 : init-pwm ( -- )
     PWMR1 chRIGHT1 ledcAttachPin 
-    PWMR2 chRIGHT2 ledcAttachPin 
+    PWMR2 chRIGHT2 ledcAttachPin
+    PWMR3 chRIGHT3 ledcAttachPin
     chRIGHT1 20000 10 ledcSetup 
-    chRIGHT2 20000 10 ledcSetup 
+    chRIGHT2 20000 10 ledcSetup
+    chRIGHT3 40000 10 ledcSetup
   ; 
 
 : servo1 ( speed -- ) 
@@ -42,6 +45,12 @@ DECIMAL
 : servo2 ( speed -- ) 
     chRIGHT2 swap ledcWrite 
   ; 
+
+: servo3 ( speed -- ) / servo de roulette frontale front wheel servo
+    chRIGHT3 swap ledcWrite 
+  ;
+
+
 
 init-pwm 
 
@@ -87,6 +96,26 @@ init-pwm
     av 1000 ms 
     s ar 1000 ms S 
   ; 
+ 
+\ commandes servo3  de roulette
+
+: turn0 (  -- )  \ no move
+    45 servo
+;
+
+: turnD45 (   --  ) \ move right
+    25 servo
+;
+
+: turnG45 ( --  ) \ move left 
+    65 servo
+;
+
+: demo ( -- ) \ test example
+    turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
+;
+
+
 
 \ chronometers with 2 HALL sensors 
 
