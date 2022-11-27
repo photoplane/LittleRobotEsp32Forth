@@ -2,7 +2,7 @@
 FORTH 
 DEFINITIONS also LEDC 
 DECIMAL                            
-16 constant PWMR 
+21 constant PWMR 
 2 constant chRIGHT                           
 : init-pwm 
 PWMR chRIGHT ledcAttachPin chRIGHT 40000 10 ledcSetup 
@@ -11,6 +11,8 @@ PWMR chRIGHT ledcAttachPin chRIGHT 40000 10 ledcSetup
 : servo  ( speed -- )
     chRIGHT SWAP ledcWrite
 ;
+
+init-pwm
 
 \ : centre ( -- ) 90 servo ; \ to start
 
@@ -27,10 +29,9 @@ PWMR chRIGHT ledcAttachPin chRIGHT 40000 10 ledcSetup
 
 : demo ( -- ) \ for example
 
-    turnD45 2000 msturn0 2000 ms turnG45 2000 ms turn0
+    turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
 ;
 
 \ drop drop 
-0 comments on commit 3f40916
-@photoplane
+
 
