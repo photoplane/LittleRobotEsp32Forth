@@ -1,0 +1,36 @@
+\ front wheel servo thanks PerterForth 
+FORTH 
+DEFINITIONS also LEDC 
+DECIMAL                            
+16 constant PWMR 
+2 constant chRIGHT                           
+: init-pwm 
+PWMR chRIGHT ledcAttachPin chRIGHT 40000 10 ledcSetup 
+;
+
+: servo  ( speed -- )
+    chRIGHT SWAP ledcWrite
+;
+
+\ : centre ( -- ) 90 servo ; \ to start
+
+: turn0 (  -- ) \ no move
+    45 servo
+;
+
+: turnD45 (   --  )  \ move right
+    25 servo
+;
+: turnG45 (  --  ) \ move left
+    65 servo
+;
+
+: demo ( -- ) \ for example
+
+    turnD45 2000 msturn0 2000 ms turnG45 2000 ms turn0
+;
+
+\ drop drop 
+0 comments on commit 3f40916
+@photoplane
+
