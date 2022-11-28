@@ -22,8 +22,8 @@ DECIMAL
 
 15 constant PWMR1 
  5 constant PWMR2 
- \ 2 constant PWMR3 
-21 constant PWMR4 
+21 constant PWMR3 
+\ 21 constant PWMR4 
 
 1 constant chRIGHT1 
 2 constant chRIGHT2
@@ -46,7 +46,7 @@ DECIMAL
     chRIGHT2 swap ledcWrite 
   ; 
 
-: servo3 ( speed -- ) / servo de roulette frontale front wheel servo
+: servo3 ( speed -- ) 
     chRIGHT3 swap ledcWrite 
   ;
 
@@ -100,15 +100,15 @@ init-pwm
 \ commandes servo3  de roulette
 
 : turn0 (  -- )  \ no move
-    45 servo
+    45 servo3
 ;
 
 : turnD45 (   --  ) \ move right
-    25 servo
+    25 servo3
 ;
 
 : turnG45 ( --  ) \ move left 
-    65 servo
+    65 servo3
 ;
 
 : demo ( -- ) \ test example
