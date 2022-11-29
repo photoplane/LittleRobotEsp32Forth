@@ -233,7 +233,7 @@ PIN_ECHO input pinmode
 ...
 
 : top: av  50 for scan next  ;
-
+: top! 3000 ms av  BEGIN scan key? AV UNTIL S ; 
 
 
 
