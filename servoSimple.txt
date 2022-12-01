@@ -2,7 +2,7 @@
 FORTH 
 DEFINITIONS also LEDC 
 DECIMAL                            
-21 constant PWMR 
+12 constant PWMR 
 2 constant chRIGHT                           
 : init-pwm 
 PWMR chRIGHT ledcAttachPin chRIGHT 40000 10 ledcSetup 
