@@ -23,7 +23,7 @@ DECIMAL
 15 constant PWMR1 
  5 constant PWMR2 
 12 constant PWMR3 
-\ 21 constant PWMR4 
+
 
 1 constant chRIGHT1 
 2 constant chRIGHT2
@@ -115,7 +115,9 @@ init-pwm
     turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
 ;
 
+: g-all turnG45 ar1 av2 ; 
 
+: d-all turnD45 ar2 av1 ;
 
 \ chronometers with 2 HALL sensors 
 
@@ -221,7 +223,7 @@ init
 ...
 : turnD90 st1 av2 500 ms S ; \ turn 90 degrees right
 ...
-: ARH   AR 1000 ms turnD90 S ; \ forward turn backward
+: ARH   AR 1000 ms g-all 1000 ms S turn0 ;  \ forward turn backward
  
 ...
 : scan
@@ -242,7 +244,27 @@ init
 ...
 
 : top: av  50 for scan next  ;
+
+...
+
 : top! 3000 ms av  BEGIN scan key? AV UNTIL S ; 
+
+...
+
+: top; av  40 0 do scan loop S ;
+
+...
+
+\ Unending 
+
+: SansFin
+    2000 ms BEGIN \ wait 
+        turn0 scan key? AV 1000 ms AR 1000 ms turn0 AV
+    UNTIL
+    S
+;
+
+
 
 
 
