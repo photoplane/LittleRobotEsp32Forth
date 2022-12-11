@@ -13,12 +13,33 @@
 DEFINED? --littleRobot [if] forget --littleRobot  [then]
 create --littleRobot
 
-\ movements Robot many thanks to PETER FORTH
+
 
 FORTH DEFINITIONS also 
 
 LEDC 
 DECIMAL 
+
+\ pile ou face
+
+0 variable choix
+
+$3FF75144 constant RNG_DATA_REG
+
+: rnd ( -- )
+    RNG_DATA_REG @
+;
+
+: random ( -- )
+    rnd SWAP mod
+;
+
+: pilface( -- )
+    2 random 1+ DUP . choix !
+
+;
+
+\ movements Robot many thanks to PETER FORTH
 
 15 constant PWMR1 
  5 constant PWMR2 
@@ -223,10 +244,20 @@ init
 ...
 : turnD90 st1 av2 500 ms S ; \ turn 90 degrees right
 ...
-: ARH   AR 1000 ms g-all 1000 ms S turn0 ;  \ forward turn backward
+\ forward turn backward with random choise
+
+: ARH ( -- ) 
+ AR 1000 ms DROP pilface choix ! \ charge la valeur de pilface
+    IF
+        choix @ 1 = g-all
+    ELSE
+        d-all
+    THEN
+    turn0
+;
  
 ...
-: scan
+: scan ( -- ) 
     trig echo 250 < IF
       ARH  
     ELSE
