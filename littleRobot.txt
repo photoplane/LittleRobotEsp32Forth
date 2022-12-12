@@ -248,8 +248,11 @@ init
 
 : ARH ( -- ) 
  AR 1000 ms DROP pilface choix ! \ charge la valeur de pilface
-    IF
-        choix @ 1 = g-all
+        choix @ 1 = 
+	IF
+	
+        g-all
+	
     ELSE
         d-all
     THEN
