@@ -136,9 +136,9 @@ init-pwm
     turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
 ;
 
-: g-all turnG45 ar1 av2 ; 
+: g-all  ar1 av2 ; 
 
-: d-all turnD45 ar2 av1 ;
+: d-all  ar2 av1 ;
 
 \ chronometers with 2 HALL sensors 
 
