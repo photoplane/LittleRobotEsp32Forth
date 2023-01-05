@@ -20,7 +20,7 @@ FORTH DEFINITIONS also
 LEDC 
 DECIMAL 
 
-\ pile ou face
+\ pile ou face nombres aléatoires 1 ou 0
 
 0 variable choix
 
@@ -118,7 +118,7 @@ init-pwm
     s ar 1000 ms S 
   ; 
  
-\ commandes servo3  de roulette
+\ commandes servo3  de roulette front wheel
 
 : turn0 (  -- )  \ no move
     45 servo3
@@ -136,9 +136,9 @@ init-pwm
     turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
 ;
 
-: g-all  ar1 av2 ; 
+: g-all  ar1 av2 ; \ move left with two weels
 
-: d-all  ar2 av1 ;
+: d-all  ar2 av1 ; \ move right with two weels
 
 \ chronometers with 2 HALL sensors 
 
@@ -246,7 +246,8 @@ init
 ...
 \ forward turn backward with random choise
 
-: ARH ( -- ) 
+: ARH ( -- ) \ ARH avant retour halte aléatoire
+
  AR 1000 ms DROP pilface choix ! \ charge la valeur de pilface
         choix @ 1 = 
 	IF
