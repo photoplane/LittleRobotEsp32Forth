@@ -1,0 +1,72 @@
+\ littleRobot with DVR8833
+
+FORTH DEFINITIONS also
+
+LEDC
+DECIMAL
+
+FORTH DEFINITIONS also LEDC DECIMAL
+
+\ movements Robot many thanks to PETER FORTH
+( PWM_DVR8833  )
+
+33 constant PWM_AIN1 \ vert
+32 constant PWM_AIN2 \ blanc
+14 constant PWM_BIN1 \ jaune
+27 constant PWM_BIN2 \ bleu
+
+1 constant chRIGHT1
+2 constant chRIGHT2
+3 constant chRIGHT3
+4 constant chRIGHT4
+
+: init-pwm
+PWM_AIN1 chRIGHT1 ledcAttachPin
+PWM_BIN1 chRIGHT2 ledcAttachPin
+PWM_AIN2 chRIGHT3 ledcAttachPin
+PWM_BIN2 chRIGHT4 ledcAttachPin
+
+chRIGHT1 20000 10 ledcSetup
+chRIGHT2 20000 10 ledcSetup
+chRIGHT3 20000 10 ledcSetup
+chRIGHT4 20000 10 ledcSetup
+;
+
+: roue1 ( speed -- ) chRIGHT1 swap ledcWrite ;
+: roue2 ( speed -- ) chRIGHT2 swap ledcWrite ;
+: roue3 ( speed -- ) chRIGHT3 swap ledcWrite ;
+: roue4 ( speed -- ) chRIGHT4 swap ledcWrite ;
+
+
+init-pwm
+
+400  value del \ pour l'ultrason
+\  200  value del  \ pour le suiveur
+
+: AV1 del  roue1 ;
+: AV2 del  roue2 ;
+: AV AV1 AV2 ;
+
+: AR1 del  roue3 ;
+: AR2 del roue4 ;
+: AR AR1 AR2 ;
+
+: st1 0 roue1 ;
+: st2 0 roue2 ;
+: st3 0 roue3 ;
+: st4 0 roue4 ;
+: S st1 st2 st3 st4 ;
+
+ : turnD AV1 AR2  ; \ tourne droite right
+ : turnD AV1 AR2  ; \ tourne droite right
+
+ : turnG AV2 AR1  ; \ tourne gauche left
+
+ : alrt av 1000 ms s ar 1000 ms S ;
+
+ : top begin alrt key? until ;
+
+
+ ." PWM_DVR8833-FAIT "
+
+
