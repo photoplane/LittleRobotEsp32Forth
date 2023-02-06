@@ -1,0 +1,51 @@
+( littleRobot roulette frontale )
+\ include /spiffs/PWM_DVR8833.txt
+
+12 constant PWMRfw  \ pin D12
+3 constant chRIGHTfw
+
+
+: init-fw ( -- )  \  fw front wheel
+PWMRfw chRIGHTfw ledcAttachPin
+chRIGHTfw 40000 10 ledcSetup
+;
+
+init-fw
+
+: servofw ( speed -- ) \  servo front wheel
+    chRIGHTfw swap ledcWrite
+  ;
+
+( commandes servo3  de roulette )
+
+: turn0 (  -- )  \ no move
+   45 servofw
+;
+
+
+( move right )
+: turnD45 (   --  )  \ : turnD45 60 servo3 ;
+    25 servofw
+;
+
+( move left )
+: turnG45 ( --  )  \ : turnG45 25 servo3 ;
+
+    65 servofw
+;
+
+: demo ( -- ) \ test example
+    turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
+;
+
+: pi/2DemoG  ( -- ) \  example with littleRobot
+4000 ms    turn0 av 500 ms turnD45 3300 ms turn0  S
+;
+
+: pi/2DemoD   ( -- ) \  example with littleRobot
+
+4000 ms    turn0 av 500 ms turnG45 3600 ms turn0  S
+;
+
+." rouletteFront FAIT"
+
