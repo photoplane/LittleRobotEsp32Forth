@@ -1,0 +1,378 @@
+\ *********************************************************************
+\ programming a little robot
+\    Filename:      littleRobot-V2.txt
+\    Date:          13 nov 2022
+\    Updated:       28 jav 2023 version complete
+\    MCU:           ESP32-WROOM-32
+\    Forth:         ESP32forth all versions 7.x++
+\    Copyright:     Daniel GOURRIBON
+\    Author:        Daniel GOURRIBON / adaptation: Marc PETREMANN
+\    GNU General Public License
+\ *********************************************************************
+
+DEFINED? --littleRobot-V2 [if] forget --littleRobot-V2  [then]
+create --littleRobot-V2
+
+FORTH DEFINITIONS also 
+
+LEDC 
+DECIMAL 
+
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ movements Robot many thanks to PETER FORTH
+
+33 constant PWM_AIN1 \ vert
+32 constant PWM_AIN2 \ blanc
+14 constant PWM_BIN1 \ jaune
+27 constant PWM_BIN2 \ bleu
+
+1 constant chRIGHT1
+2 constant chRIGHT2
+3 constant chRIGHT3
+4 constant chRIGHT4
+
+: init-pwm
+PWM_AIN1 chRIGHT1 ledcAttachPin
+PWM_BIN1 chRIGHT2 ledcAttachPin
+PWM_AIN2 chRIGHT3 ledcAttachPin
+PWM_BIN2 chRIGHT4 ledcAttachPin
+
+chRIGHT1 20000 10 ledcSetup
+chRIGHT2 20000 10 ledcSetup
+chRIGHT3 20000 10 ledcSetup
+chRIGHT4 20000 10 ledcSetup
+;
+
+: roue1 ( speed -- ) chRIGHT1 swap ledcWrite ;
+: roue2 ( speed -- ) chRIGHT2 swap ledcWrite ;
+: roue3 ( speed -- ) chRIGHT3 swap ledcWrite ;
+: roue4 ( speed -- ) chRIGHT4 swap ledcWrite ;
+
+ 
+
+
+init-pwm
+ 400  value del \ pour l'ultrason
+
+\ 200 value del  \ pour le suiveur
+
+\  : delay del ms ;
+
+: AV1 del  roue1 ;
+: AV2 del  roue2 ;
+: AV AV1 AV2 ;
+
+: AR1 del  roue3 ;
+: AR2 del roue4 ;
+: AR AR1 AR2 ;
+
+: st1 0 roue1 ;
+: st2 0 roue2 ;
+: st3 0 roue3 ;
+: st4 0 roue4 ;
+: S st1 st2 st3 st4 ;
+
+ \ : turnD AV1 AR2  ; \ tourne droite right
+
+\ : turnG AV2 AR1  ; \ tourne gauche left
+
+ \ AV 500 ms s turnG 8000 ms S AV 500 ms s turnG 8000 ms S
+
+\ examples
+
+ : alrt av 1000 ms s ar 1000 ms S ;
+
+ : top begin alrt key? until ;
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+( littleRobot roulette frontale )
+
+12 constant PWMRfw  \ pin D12
+3 constant chRIGHTfw
+
+
+: init-fw ( -- )  \ fw front wheel
+PWMRfw  chRIGHTfw  ledcAttachPin
+chRIGHTfw  40000 10 ledcSetup
+;
+
+init-fw
+
+: servofw ( speed -- ) \ servo front wheel
+    chRIGHT3 swap ledcWrite 
+  ;
+
+
+( commandes servo3  de roulette )
+
+: turn0 (  -- )  \ no move
+    45 servofw
+;
+
+
+( move right )
+: turnD45 (   --  )  
+    15 servofw
+;
+( move left )
+: turnG45 ( --  ) 
+
+    65 servofw
+;
+
+
+\ examples
+
+: demo ( -- ) \ test example
+    turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
+;
+
+
+
+: pi/2DemoD  ( -- ) \  example with littleRobot
+2000 ms    turn0 av 500 ms turnD45 4000 ms turn0 av 500 ms S
+;
+
+: pi/2DemoG  ( -- ) \  example with littleRobot
+2000 ms    turn0 av 500 ms turnG45 4000 ms turn0 av 500 ms S
+;
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ ultrason littleRobot many thanks to Atle Bergstrom 
+
+\ pile ou face nombres aléatoires 1 ou 0
+
+0 variable choix
+
+$3FF75144 constant RNG_DATA_REG
+
+: rnd ( -- )
+    RNG_DATA_REG @
+;
+
+: random ( -- )
+    rnd SWAP mod
+;
+
+: pilface ( -- )
+    2 random 1+ DUP . choix !
+
+;
+
+( ROBOT EVITANT LES OBSTACLES )
+: ... 200 ms ;
+
+\ decommenter pour touner en inversant les roues
+
+\ : D_fw  S ... ar  ...  S ... ar1 av2 3000 ms   S ;
+\ : D_fw  S ... ar  ...  S ... ar2 av1 3000 ms   s ;
+
+\ with the front wheel avec la roulette frontale
+\ turn right
+:  d-pi/2
+S ...  turnG45 ...  S ...   ar 1000 ms ." G" ...  S ;
+: D_fw turn0  d-pi/2 turn0 ;
+
+( turn left)
+   : g-pi/2
+ S ...  turnD45 ...  S ...  ar 1000 ms ." D" ...   S ;
+: G_fw turn0 g-pi/2 turn0 ;
+
+
+18 constant PIN_ECHO  
+
+19 constant PIN_TRIG 
+                   
+PIN_TRIG output pinmode 
+                                    
+PIN_ECHO input pinmode 
+
+: trig
+    LOW PIN_TRIG pin 2 ms 
+	HIGH PIN_TRIG pin 10 ms 
+	LOW PIN_TRIG pin
+;
+
+: init
+  PIN_TRIG OUTPUT pinMode PIN_ECHO INPUT pinMode
+;
+
+
+init
+
+
+
+: echo
+    PIN_ECHO pulsein  
+;
+
+\: turnD90 st1 av2 500 ms S ; \ turn 90 degrees right
+
+
+ \ forward turn backward
+
+
+
+: ARH
+    AR 1000 ms DROP pilface  \ A avant R retour H halt
+    
+( si pile ou face egale 1 )
+        choix @ dup . 1 =    \ dup . to see the random
+    IF 
+      D_fw   \ turn right
+    ELSE
+      G_fw   \ turn left
+    THEN
+
+;
+
+: scan
+    trig echo 250 < IF
+     ARH
+   ELSE
+     THEN
+;
+
+\ example
+
+: top!  3000 ms av  BEGIN  turn0 scan key? AV UNTIL S ;
+
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+( suiveur de ligne connected on pin G34 and G35 )
+( merci pour  electroniqueamateur.blogspot.com )
+
+34 constant D
+35 constant G
+
+: init-suiveur ( -- )
+   D  input pinMode
+   G input pinMode
+  ;
+
+: suiveurD  ( -- n )
+   D analogRead
+ 100 /         \  pour dizaines
+;
+
+: suiveurG  ( -- n )
+  G analogRead
+ 100 /           \ pour dizaines
+;
+
+
+\ test loop
+ : suiveur-ligne ( --)
+
+3000 ms
+
+     init-suiveur
+
+ turn0
+
+     begin
+
+
+
+\ decommenter pour la roulette
+
+ 100  roue1
+ 100 roue2
+
+
+\ lecture des valeurs
+
+  ." Led Droite  : "  suiveurD     .   cr
+
+        200 ms
+  ." Led Gauche  : "  suiveurG    .    cr
+
+        200 ms
+
+\  option avec la roulette frontale
+  suiveurD suiveurG and  35 >  if turn0
+  else suiveurD suiveurG   > if turnD45
+  else suiveurG  suiveurD  > if turnG45
+
+\ option en inversant les roues
+\  \ suiveurD suiveurG and  35 >  if S  100 roue1  100 roue2 100 ms
+\ else suiveurD suiveurG   > if S  350 roue2 350 roue3
+\ else suiveurG  suiveurD  > if S  350 roue1 350 roue4
+
+  then  then then
+
+ suiveurD suiveurG and  30  < if S  600 ms   then
+
+ suiveurD suiveurG and  30  < if S  600 ms   then
+
+ suiveurD suiveurG and  30 > while
+
+  repeat
+ ;
+
+
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ chronometers with 2 HALL sensors optional
+
+2 constant capt1 
+variable c 
+variable t1 
+\ variable t2 
+
+4 constant capt2 
+variable d 
+variable d1 
+\ variable d2 
+
+0 constant GPIO_PULLUP_ONLY 
+capt1 input pinMode 
+
+: ##: 
+    <# 49 HOLD 68 HOLD 46 HOLD 67 HOLD 
+    69 HOLD 83 HOLD 32 HOLD # # # 44 HOLD # #> 
+    type 
+  ; 
+
+0 constant GPIO_PULLUP_ONLY
+capt2 input pinMode 
+
+: ###: 
+    <# 50 HOLD 71 HOLD 46 HOLD 67 HOLD 
+    69 HOLD 83 HOLD 32 HOLD # # # 44 HOLD # #> 
+    type 
+  ; 
+
+: tempo 
+    capt1 digitalRead 
+    if 
+        1 = ms-ticks dup t1 ! 
+        c @ - ##: cr 
+    else 
+        t1 @ c ! 
+    then 
+  ; 
+
+
+
+
+\ interrupts code
+
+interrupts 
+
+capt1 gpio_pulldown_en drop 
+
+capt2 gpio_pulldown_en drop 
+
+capt1 #GPIO_INTR_POSEDGE gpio_set_intr_type drop 
+
+capt2 #GPIO_INTR_POSEDGE gpio_set_intr_type drop 
+
+' tempo capt1 pinchange 
+
+' tempi capt2 pinchange 
+
+forth
+
+." littleRobot-V2-FAIT"
