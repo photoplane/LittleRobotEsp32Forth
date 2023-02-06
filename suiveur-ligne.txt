@@ -1,0 +1,70 @@
+( suiveur de ligne with front whell )
+( merci pour  electroniqueamateur.blogspot.com )
+
+
+34 constant D
+35 constant G
+
+: init-suiveur ( -- )
+   D  input pinMode
+   G input pinMode
+  ;
+
+: suiveurD  ( -- n )
+   D analogRead
+ 100 /         \  pour dizaines
+;
+
+: suiveurG  ( -- n )
+  G analogRead
+ 100 /           \ pour dizaines
+;
+
+\ test loop
+ : suiveur-ligne ( --)
+
+3000 ms
+
+     init-suiveur
+
+ turn0
+
+     begin
+
+
+
+\ decommenter pour la roulette
+
+ 100  roue1
+ 100 roue2
+
+
+\ lecture des valeurs
+
+  ." Led Droite  : "  suiveurD     .   cr
+        200 ms
+  ." Led Gauche  : "  suiveurG    .    cr
+        200 ms
+
+\  option avec la roulette frontale
+  suiveurD suiveurG and  35 >  if turn0
+  else suiveurD suiveurG   > if turnD45
+  else suiveurG  suiveurD  > if turnG45
+
+\ option en inversant les roues
+\  \ suiveurD suiveurG and  35 >  if S  100 roue1  100 roue2 100 ms
+\ else suiveurD suiveurG   > if S  350 roue2 350 roue3
+\ else suiveurG  suiveurD  > if S  350 roue1 350 roue4
+
+  then  then then
+
+ suiveurD suiveurG and  30  < if S  600 ms   then
+
+ suiveurD suiveurG and  30 > while
+
+  repeat
+ ;
+
+
+." suiveur-ligne-FAIT"
+
