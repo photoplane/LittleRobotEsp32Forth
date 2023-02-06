@@ -1,0 +1,101 @@
+\ Ultrason littleRobot many thanks to Atle Bergstrom
+\ Avec roulette frontale with front wheel
+
+\ pile ou face nombres aléatoires 1 ou 2
+\ random
+
+0 variable choix
+
+$3FF75144 constant RNG_DATA_REG
+
+: rnd ( -- )
+    RNG_DATA_REG @
+;
+
+: random ( -- )
+    rnd SWAP mod
+;
+
+: pilface ( -- )
+    2 random 1+ DUP . choix !
+
+;
+
+\ robot evitant le obstacle
+
+: ... 200 ms ;
+
+\ decommenter pour touner en inversant les roues
+
+\ : d-pi/2  S ... ar  ...  S ... ar1 av2 3000 ms   S ;
+\ : g-pi/2  S ... ar  ...  S ... ar2 av1 3000 ms   s ;
+
+\ with the front wheel avec la roulette frontale
+( turn right )
+:  d-pi/2
+S ...  turnG45 ...  S ...   ar 1000 ms ." G" ...  S ;
+: D_fw turn0  d-pi/2 turn0 ;
+
+( turn left)
+   : g-pi/2
+ S ...  turnD45 ...  S ...  ar 1000 ms ." D" ...   S ;
+: G_fw turn0 g-pi/2 turn0 ;
+
+18 constant PIN_ECHO
+
+19 constant PIN_TRIG
+
+PIN_TRIG output pinmode
+
+PIN_ECHO input pinmode
+
+
+: trig
+    LOW PIN_TRIG pin 2 ms
+HIGH PIN_TRIG pin 10 ms
+LOW PIN_TRIG pin
+;
+
+
+: init
+  PIN_TRIG OUTPUT pinMode PIN_ECHO INPUT pinMode
+;
+
+init
+
+
+
+: echo
+    PIN_ECHO pulsein
+;
+
+\ forward turn backward
+
+
+
+: ARH
+    AR 1000 ms DROP pilface   \ A avant R retour H halt
+
+        choix @ dup .   1  =    \ si  egale 1 dup . to see random
+    IF
+        D_fw  \ correspond  right
+    ELSE
+        G_fw  \ correspond  left
+    THEN
+;
+
+: scan
+    trig echo 350 < IF
+      ARH
+    ELSE
+
+    THEN
+;
+
+\ example
+
+
+: top! 3000 ms av  BEGIN scan key? AV UNTIL S ;
+
+." ultrason FAIT"
+
