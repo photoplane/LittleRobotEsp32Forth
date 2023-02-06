@@ -1,0 +1,58 @@
+\ chronometers with 2 HALL sensors optional
+
+2 constant capt1 
+variable c 
+variable t1 
+\ variable t2 
+
+4 constant capt2 
+variable d 
+variable d1 
+\ variable d2 
+
+0 constant GPIO_PULLUP_ONLY 
+capt1 input pinMode 
+
+: ##: 
+    <# 49 HOLD 68 HOLD 46 HOLD 67 HOLD 
+    69 HOLD 83 HOLD 32 HOLD # # # 44 HOLD # #> 
+    type 
+  ; 
+
+: ###: 
+    <# 50 HOLD 71 HOLD 46 HOLD 67 HOLD 
+    69 HOLD 83 HOLD 32 HOLD # # # 44 HOLD # #> 
+    type 
+  ; 
+
+: tempo 
+    capt1 digitalRead 
+    if 
+        1 = ms-ticks dup t1 ! 
+        c @ - ##: cr 
+    else 
+        t1 @ c ! 
+    then 
+  ; 
+
+
+
+\ interrupts code
+
+interrupts 
+
+capt1 gpio_pulldown_en drop 
+
+capt2 gpio_pulldown_en drop 
+
+capt1 #GPIO_INTR_POSEDGE gpio_set_intr_type drop 
+
+capt2 #GPIO_INTR_POSEDGE gpio_set_intr_type drop 
+
+' tempo capt1 pinchange 
+
+' tempi capt2 pinchange 
+
+forth
+
+." chronometers-FAIT"
