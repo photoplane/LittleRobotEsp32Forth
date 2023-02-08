@@ -1,6 +1,5 @@
 # LittleRobotEsp32Forth!
 
-![alt tag](https://user-images.githubusercontent.com/31778273/217609514-66541583-4fe0-4cb6-998b-418ef38b3e1b.png)
 
 littleRobot dessus et dessous littleRobot above and below
 
