@@ -1,8 +1,8 @@
 # LittleRobotEsp32Forth!
-![alt tag](https://skopas.pagesperso-orange.fr/Forth/tiny2.png)
 
-Avec le capteur ultrason.
+![alt tag](https://user-images.githubusercontent.com/31778273/217609514-66541583-4fe0-4cb6-998b-418ef38b3e1b.png)
 
+littleRobot dessus et dessous littleRobot above and below
 
 ![alt tag](https://user-images.githubusercontent.com/31778273/217016920-76d7783c-00c1-4d11-9939-c3dd6e7aff2c.png)
 
