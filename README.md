@@ -16,11 +16,12 @@ https://user-images.githubusercontent.com/31778273/217523850-f7eafb3b-675a-470d-
 Shéma du capteur suiveur de ligne, line follower.
 
 
-![alt tag](https://user-images.githubusercontent.com/31778273/218247914-e914ee5b-1291-4b6d-9ab0-14352c56eee0.png)
+![alt tag](https://user-images.githubusercontent.com/31778273/218248724-4bfde415-3c67-4245-a742-0eac1fb06e00.png)
 
 Implantation des composants sur plaque avec bande.
 
 
 ![alt tag](https://user-images.githubusercontent.com/31778273/218248610-7e87aa9c-6cf2-46f5-8d22-bdb6d15036a8.png)
+
 
 Le capteur suiveur de ligne réalisé d'après electroniqueamateur.blogspot.com.
