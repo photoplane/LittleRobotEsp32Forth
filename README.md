@@ -14,3 +14,8 @@ https://user-images.githubusercontent.com/31778273/217523850-f7eafb3b-675a-470d-
 ![alt tag](https://user-images.githubusercontent.com/31778273/218247443-6e8f3cd2-89ed-4709-9b93-e8f325aeca94.png)
 
 Shéma du capteur suiveur de ligne, line follower.
+
+
+![alt tag](https://user-images.githubusercontent.com/31778273/218247914-e914ee5b-1291-4b6d-9ab0-14352c56eee0.png)
+
+Implantation des composants sur plaque avec bande.
