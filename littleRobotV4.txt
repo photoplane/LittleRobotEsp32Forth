@@ -1,0 +1,315 @@
+*********************************************************************
+\ programming a little robot with random
+\    Filename:      littleRobotV4.txt
+\    Date:          13 nov 2022
+\    Updated:       9 aou 2023 version complete
+\    MCU:           ESP32-WROOM-32
+\    Forth:         ESP32forth all versions 7.x++
+\    Copyright:     Daniel GOURRIBON
+\    Author:        Daniel GOURRIBON / adaptation: Marc PETREMANN
+\    GNU General Public License
+\ *********************************************************************
+DEFINED? --littleRobotV4 [if] forget --littleRobotV4  [then]
+create --littleRobotV4
+
+FORTH DEFINITIONS also LEDC DECIMAL
+
+\ movements Robot many thanks to PETER FORTH
+( PWM_DVR8833  )
+
+33 constant PWM_AIN1 \ vert
+32 constant PWM_AIN2 \ blanc
+14 constant PWM_BIN1 \ jaune
+27 constant PWM_BIN2 \ bleu
+
+1 constant chRIGHT1
+2 constant chRIGHT2
+3 constant chRIGHT3
+4 constant chRIGHT4
+
+: init-pwm
+PWM_AIN1 chRIGHT1 ledcAttachPin
+PWM_BIN1 chRIGHT2 ledcAttachPin
+PWM_AIN2 chRIGHT3 ledcAttachPin
+PWM_BIN2 chRIGHT4 ledcAttachPin
+chRIGHT1 20000 10 ledcSetup
+chRIGHT2 20000 10 ledcSetup
+chRIGHT3 20000 10 ledcSetup
+chRIGHT4 20000 10 ledcSetup
+;
+
+: roue1 ( speed -- ) chRIGHT1 swap ledcWrite ;
+: roue2 ( speed -- ) chRIGHT2 swap ledcWrite ;
+: roue3 ( speed -- ) chRIGHT3 swap ledcWrite ;
+: roue4 ( speed -- ) chRIGHT4 swap ledcWrite ;
+
+
+init-pwm
+
+800  value Vvfast \ very fast
+400  value Vfast  \ speed fast
+300  value del    \ normal
+200  value Vslow  \ slow
+100   value Vvslow \ very slow
+
+: AV1 del  roue1 ;
+: AV2 del  roue2 ;
+: AV AV1 AV2 ;
+
+: AR1 del  roue3 ;
+: AR2 del roue4 ;
+: AR AR1 AR2 ;
+
+: st1 0 roue1 ;
+: st2 0 roue2 ;
+: st3 0 roue3 ;
+: st4 0 roue4 ;
+: S st1 st2 st3 st4 ; \ stop
+
+: turnD AV1 AR2  ; \ tourne droite right
+: turnG AV2 AR1  ; \ tourne gauche left
+
+ : alrt av 1000 ms s ar 1000 ms S ;
+
+ : sansFin begin alrt key? until ;
+
+
+ ." PWM_DVR8833 ALRT_OK " cr
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+( littleRobotV3 roulette frontale )
+
+15 constant PWMRfw  \ pin D15 fil jaune
+5 constant chRIGHTfw 
+
+
+: init-fw ( -- )  \  fw front wheel
+PWMRfw chRIGHTfw ledcAttachPin
+chRIGHTfw 40000 10 ledcSetup
+;
+
+init-fw
+
+: servofw ( speed -- ) \  servo front wheel
+    chRIGHTfw swap ledcWrite 
+;
+
+( commandes servo3  de roulette )
+
+: turn0 (  -- )  \ no move
+   45 servofw
+;
+
+( move right )
+: turnD45 (   --  )  \ : turnD45 60 servo3 ;
+    30  servofw
+;
+
+( move left )
+: turnG45 ( --  )  \ : turnG45 25 servo3 ;
+    60  servofw
+;
+\ Examples
+
+: demo ( -- ) \ test example
+    turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
+;
+
+: pi/2DemoG  ( -- ) \  example with littleRobot
+4000 ms    turn0 av  500 ms turnD45 3300 ms turn0  S
+;
+
+: pi/2DemoD   ( -- ) \  example with littleRobot
+4000 ms    turn0 av 500 ms turnG45 3600 ms turn0  S 
+;
+
+." rouletteFront demo_OK "  cr
+drop
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ pile ou face nombres aléatoires 1 ou 2
+\ Avec roulette frontale with front wheel
+\ many thanks to Marc PETREMANN
+
+1 variable choix
+
+$3FF75144 constant RNG_DATA_REG
+
+: rnd 
+    RNG_DATA_REG @
+;
+
+: random
+    rnd SWAP mod
+;
+: pilface
+    2 random 1+ DUP . choix !
+;
+
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ robot evitant le obstacle 
+\ Ultrason littleRobot many thanks to Atle Bergstrom 
+: ... 200 ms ;
+
+200  value del / normal 
+ 
+\ with the front wheel 
+( turn right ) 
+:  d-pi/2
+S ...  turnG45 ...  S ...   av 1000 ms ." G" ...  S ;
+: D_fw turn0  d-pi/2 turn0 ;
+
+( turn left)
+   : g-pi/2 
+ S ...  turnD45 ...  S ... av 1000 ms ." D" ...   S ;
+
+: G_fw turn0 g-pi/2 turn0 ;
+
+
+18 constant PIN_ECHO  
+19 constant PIN_TRIG 
+                   
+PIN_TRIG output pinmode 
+PIN_ECHO input pinmode 
+
+ 
+: trig
+    LOW PIN_TRIG pin 2 ms 
+HIGH PIN_TRIG pin 10 ms 
+LOW PIN_TRIG pin
+;
+
+: init
+  PIN_TRIG OUTPUT pinMode PIN_ECHO INPUT pinMode
+;
+
+init
+
+\ Random backward and turn right or left
+: ARH
+    AR 1000 ms DROP pilface  \ A avant R retour H halt
+    
+( si pile ou face egale 1 )
+        choix @ dup . 1 =    \ dup . to see the random
+    IF 
+      turnD45   \ turn right
+    ELSE
+      turnG45  \ turn left
+    THEN
+
+;
+
+: echo
+    PIN_ECHO pulsein  
+;
+
+." ultrason _OK" cr
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+( TOURELLE ULTRASON )
+ 
+13 constant PWMRtw  \ pin D13
+6 constant chRIGHttw
+
+: init-tw ( -- )  \  tw turret ultrason
+PWMRtw chRIGHTtw ledcAttachPin
+chRIGHTtw 40000 10 ledcSetup
+;
+
+init-tw
+
+: servotw ( speed -- ) \  servo turret
+    chRIGHTtw swap ledcWrite
+;
+
+: turretF 78 servotw ;
+: turretD 60 servotw ;
+: turretG 90 servotw ;
+
+: topF ;
+: topG ;
+: topD ;
+
+( rappel reminder )
+\ 800  value Vvfast \ very fast
+\ 400  value Vfast  \ speed fast
+\ 300  value del    \ normal
+\ 200  value Vslow  \ slow
+\ 100   value Vvslow \ very slow
+\ AV1 del roue1
+
+: Fav1 Vfast roue1 ;  : Fav2 Vfast roue2 ;
+: fastAV  Fav1 Fav2 ;
+ 
+: Far1 Vfast roue3 ;  : Far2 Vfast roue4 ;
+: fastAR  Far1 Far2 ;
+
+: Sav1 Vslow roue1 ;  : Sav2 Vslow roue2 ;
+: slowAV Sav1 Sav2 ;
+ 
+: Sar1 Vslow roue3 ;  : Sar2 Vslow roue4 ;
+: slowAR  Sar1 Sar2 ;
+
+
+\ -->topF straight  droit 
+: turret_F S ... ARH ... S ...  fastAR 500 ms
+  ." F " ...  S ;
+: F_Tw turn0 turret_F turn0  turretF ;
+: scanF trig echo 450 < IF  F_Tw  ELSE topG  THEN ;
+: topF turretF  200 ms scanF ;
+
+ 
+\ -->topG
+: turret_G S ...  turnG45 ...  S ...  fastAR  500 ms
+ ." G" ...  S ;
+: G_Tw turn0 turret_G turn0 turretF ;
+: scanG trig echo 450 < IF G_Tw ELSE topD THEN ;
+: topG turretG  200 ms scanG ;
+
+\ -->topD
+: turret_D S ...  turnD45 ...  S ...  fastAR  500  ms
+ ." D" ...  S ;
+: D_Tw turn0 turret_D turn0 turretD ;
+: scanD trig echo 450 < IF D_Tw ELSE topF  THEN ;
+: topD turretD  200 ms scanD ;
+
+\ : scanF trig echo 450 < IF  F_Tw  ELSE topG  THEN ;
+\ : scanG trig echo 450 < IF G_Tw ELSE topD THEN ;
+\ : scanD trig echo 450 < IF D_Tw ELSE topF THEN ;
+
+( Commandes avec detection d'obstacles)
+\ demo turret
+: demotw turretF   ...  turretD ... turretF  ... turretG ... turretF ;
+
+ : top slowAV  begin ... topF slowAV ... topG slowAV ... topD slowAV ...  key?   UNTIL  ;
+
+\ three seconds wait on attend trois secondes
+: top> 3000 ms slowAV  begin ... topF slowAV ... topG slowAV ... topD slowAV ...  key?   UNTIL  ;
+
+
+ \ vitesse normale
+\ : top> 3000 ms av begin ... topF av ... topG va ... topD va ...  key?   UNTIL  ;
+
+
+\ vitesse lente
+\ : top>slow 3000 ms slowAV begin ... topF slowAV ... topG slowAV ... topD slowAV ...  key?   UNTIL  ;
+
+\ vitesse rapide
+\ : top>fast 3000 ms fastAV begin ... topF fastAV ... topG fastAV ... topD fastAV ...  key?   UNTIL  ;
+
+
+
+
+\  : top<  3000 ms  av begin demotw key? av until S  ;
+\  : demotw! begin demotw key? until   ;
+
+
+." turret top" cr
+
+drop
+
+." ***ALL CORRECT !*** "
+
+
+
