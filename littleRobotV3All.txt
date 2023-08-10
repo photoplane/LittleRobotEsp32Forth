@@ -1,0 +1,269 @@
+( littleRobotV3complete )
+( Many thanks to PeterForth  ) 
+( motor L295N vaav_lent )
+
+FORTH  DECIMAL
+
+12 constant PWML
+14 constant dirleft1
+27 constant dirleft2 
+25 constant PWMR
+33 constant dirright1
+32 constant dirright2
+
+1 constant chLEFT    
+2 constant chRIGHT
+3 constant chBOTH
+
+1  constant FORWARD 
+0  constant BACKWARD
+
+FORTH DEFINITIONS also LEDC   ( vocabulary ) 
+
+: init_dir_pins  ( --)   
+    dirleft1   OUTPUT pinmode  dirleft2  OUTPUT pinmode  
+    dirright1  OUTPUT pinmode  dirright2 OUTPUT pinmode ;
+: init_pwm_pins  ( --)  
+    dirleft1   OUTPUT pinmode  dirleft2  OUTPUT pinmode  
+    dirright1  OUTPUT pinmode  dirright2 OUTPUT pinmode ;
+: init_pwm_pins  ( --)   
+         PWML chLEFT        ledcAttachPin
+         PWMR chRIGHT       ledcAttachPin 
+         chLEFT 40000 10    ledcSetup       
+         chRIGHT 40000 10   ledcSetup ;
+
+: SETPINS   ( n n n n  --)   
+               dirleft1 pin     dirleft2 pin  
+               dirright1 pin    dirright2 pin  ;
+   
+: FW     0 1  0 1 SETPINS ;
+: BW     1 0  1 0 SETPINS ;
+: LEFT   0 1  1 0 SETPINS ;
+: RIGHT  1 0  0 1 SETPINS ;
+
+: initall   ( --)  init_dir_pins  init_pwm_pins RIGHT LEFT BW FW  ;
+
+: motleft  ( speed -- ) DUP chLEFT swap ledcWrite ;
+: motright ( speed -- ) DUP chRIGHT swap ledcWrite ; 
+
+( abbreviations for fast typing )
+: ml  motleft ;
+: mr  motright ; 
+
+( MOTORS MOVE )
+: MM ( speed -- ) DUP chLEFT swap ledcWrite chRIGHT swap ledcWrite ;
+
+
+initall
+ 
+ 400 value speed
+ 260 value slowspeed
+ 800 value fastspeed
+ 100 value veryslowspeed
+
+: STOP  0 mm ;
+: S STOP ;
+
+\ optional
+
+\ : va  260  MM ; \ va la place de run 
+ : vaav_lent slowspeed FW  MM  ;
+ : vaav_rapid fastspeed FW MM ;
+\ pour le suiveur de ligne
+ : vaav_verylent veryslowspeed FW MM : 
+
+\ :  vaAR BW 400 MM ;;
+ :  vaar_lent slowspeed BW  MM  ;
+ :  vaar_rapid BW 400 MM ;
+
+
+\ exemples
+ 
+: alrt  vaav_lent  1000 ms STOP   vaar_lent  1000 ms  STOP ;
+
+: sansfin begin alrt key? until ;
+
+drop drop
+." littleRobotV3complete_OK " cr
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+( littleRobot roulette frontale )
+ 
+15 constant PWMRfw  \ pin D15 fil jaune
+5 constant chRIGHTfw
+
+: init-fw ( -- )  \  fw front wheel
+PWMRfw chRIGHTfw ledcAttachPin
+chRIGHTfw 40000 10 ledcSetup
+;
+
+init-fw
+
+: servofw ( speed -- ) \  servo front wheel
+    chRIGHTfw swap ledcWrite 
+;
+
+( commandes servo3  de roulette )
+
+: turn0 (  -- )  \ no move direction
+   45 servofw
+;
+
+( move right )
+: turnD45 (   --  )  \ : turnD45 60 servo3 ;
+    30  servofw
+;
+
+( move left )
+: turnG45 ( --  )  \ : turnG45 25 servo3 ;
+    60  servofw
+;
+
+: demo ( -- ) \ test example
+    turnD45 2000 ms turn0 2000 ms turnG45 2000 ms turn0
+;
+ 
+." rouletteFront FAIT"
+drop
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\ Ultrason littleRobot many thanks to Atle Bergstrom 
+\ Avec roulette frontale with front wheel
+ 
+\ pile ou face nombres aléatoires 1 ou 2
+
+
+\ robot evitant le obstacle 
+
+: ... 200 ms ;
+
+
+\ with the front wheel 
+( turn right ) 
+:  d-pi/2
+S ...  turnG45 ...  S ...   vaav_lent 1000 ms ." G" ...  S ;
+: D_fw turn0  d-pi/2 turn0 ;
+
+( turn left)
+   : g-pi/2 
+ S ...  turnD45 ...  S ... vaar_lent  1000 ms ." D" ...   S ;
+
+: G_fw turn0 g-pi/2 turn0 ;
+18 constant PIN_ECHO  
+
+19 constant PIN_TRIG 
+                   
+PIN_TRIG output pinmode 
+                                    
+PIN_ECHO input pinmode 
+
+ 
+: trig
+    LOW PIN_TRIG pin 2 ms 
+HIGH PIN_TRIG pin 10 ms 
+LOW PIN_TRIG pin
+;
+
+: init
+  PIN_TRIG OUTPUT pinMode PIN_ECHO INPUT pinMode
+;
+: init
+  PIN_TRIG OUTPUT pinMode PIN_ECHO INPUT pinMode
+;
+
+init
+
+: echo
+    PIN_ECHO pulsein  
+;
+
+." ultrason FAIT" cr
+
+\ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+( TOURELLE ULTRASON )
+ 
+13 constant PWMRtw  \ pin D13
+6 constant chRIGHttw
+
+: init-tw ( -- )  \  tw turret ultrason
+PWMRtw chRIGHTtw ledcAttachPin
+chRIGHTtw 40000 10 ledcSetup
+;
+
+init-tw
+
+: servotw ( speed -- ) \  servo turret
+    chRIGHTtw swap ledcWrite
+;
+
+: turretF 78 servotw ;
+: turretD 60 servotw ;
+: turretG 90 servotw ;
+
+: topF ;
+: topG ;
+: topD ;
+
+\ -->topF
+: turret_F S ... turn0 ... S ...  vaar_rapid 500 ms
+  ." F " ...  S ;
+: F_Tw turn0 turret_F turn0 turretF ;
+: scanF trig echo 450 < IF  F_Tw  ELSE topG  THEN ;
+
+: topF turretF  200 ms scanF ;
+
+ 
+\ -->topG
+: turret_G S ...  turnG45 ...  S ...  vaar_rapid  500 ms
+ ." G" ...  S ;
+: G_Tw turn0 turret_G turn0 turretF ;
+: scanG trig echo 450 < IF G_Tw ELSE topD THEN ;
+
+: topG turretG  200 ms scanG ;
+
+\ -->topD
+: turret_D S ...  turnD45 ...  S ...  vaar_rapid  500  ms
+ ." D" ...  S ;
+: D_Tw turn0 turret_D turn0 turretD ;
+: scanD trig echo 450 < IF D_Tw ELSE topF  THEN ;
+
+: topD turretD  200 ms scanD ;
+
+\ : scanF trig echo 450 < IF  F_Tw  ELSE topG  THEN ;
+\ : scanG trig echo 450 < IF G_Tw ELSE topD THEN ;
+\ : scanD trig echo 450 < IF D_Tw ELSE topF THEN ;
+
+\ Commandes avec detection d'obstacles
+: top vaav_lent  begin ... topF vaav_lent ... topG vaav_lent ... topD vaav_lent  ...  key?   UNTIL  ;
+
+
+: top> 3000 ms vaav_lent  begin ... topF vaav_lent ... topG vaav_lent ... topD vaav_lent  ...  key?   UNTIL  ;
+
+
+ \ vitesse normale
+\ : top> 3000 ms va begin ... topF va ... topG va ... topD va ...  key?   UNTIL  ;
+
+
+\ vitesse lente
+\ : top>slow 3000 ms va_lent begin ... topF va_lent ... topG va_lent ... topD va_lent ...  key?   UNTIL  ;
+
+\ vitesse rapide
+\ : top>fast 3000 ms va_rapid begin ... topF va_rapid ... topG va_rapid ... topD va_rapid ...  key?   UNTIL  ;
+
+
+: demotw turretF   ...  turretD ... turretF  ... turretG ... turretF ;
+
+\  : top<  3000 ms  vaav_lent  begin demotw key? vaav_lent  until S  ;
+\  : demotw! begin demotw key? until   ;
+turretF
+
+." turret_FAIT" cr
+
+drop
+
+." ***ALL CORRECT !*** "
+
+
